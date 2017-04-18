@@ -1,0 +1,9 @@
+OPEN_APP
+C://Users//jk//Desktop//script//MidasServer.bat
+SLEEP 2000
+OPEN_APP
+C://Users//jk//Desktop//script//MidasClient.bat
+SLEEP 3000
+OPEN_WEB
+http://localhost:8765/#/Overview
+SLEEP 3000
